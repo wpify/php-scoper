@@ -19,7 +19,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.0' # Set the PHP version to your project's requirement
+          php-version: '8.1' # Set the PHP version to your project's requirement
 
       - name: Install dependencies
         run: |
