@@ -1,0 +1,16 @@
+{
+    "name": "wpify/php-scoper",
+    "type": "library",
+    "authors": [
+        {
+            "name": "mejta",
+            "email": "daniel@mejta.net"
+        }
+    ],
+    "require": {
+        "php": "^8.1"
+    },
+    "bin": [
+        "bin/php-scoper.phar"
+    ]
+}
