@@ -11,6 +11,13 @@ function getLatestRelease() {
 	return json_decode($response, true);
 }
 
+// Function to get the required PHP version from humbug/php-scoper's composer.json
+function getRequiredPhpVersion() {
+	$url = 'https://raw.githubusercontent.com/humbug/php-scoper/main/composer.json';
+	$composerJson = json_decode(file_get_contents($url), true);
+	return $composerJson['require']['php'];
+}
+
 // Function to update the composer.json file with the new PHP version
 function updateComposerJson($newPhpVersion) {
 	$composerJsonPath = 'composer.json';
@@ -30,6 +37,9 @@ $latestRelease = getLatestRelease();
 $newVersion = $latestRelease['tag_name'];
 $downloadUrl = $latestRelease['assets'][0]['browser_download_url'];
 
+// Get the required PHP version
+$newPhpVersion = getRequiredPhpVersion();
+
 // Check if a new release is available
 $currentVersion = trim(shell_exec('git tag | tail -n1')); // Get the latest tag, or nothing if no tags exist
 
@@ -39,7 +49,6 @@ if (empty($currentVersion)) {
 
 if (version_compare($newVersion, $currentVersion, '>')) {
 	// Update composer.json
-	$newPhpVersion = $latestRelease['target_commitish']; // Assuming the target commitish is the PHP version
 	updateComposerJson($newPhpVersion);
 
 	// Download latest release
