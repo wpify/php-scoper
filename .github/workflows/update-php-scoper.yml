@@ -29,20 +29,21 @@ jobs:
         id: update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ENV: ${{ env.GITHUB_ENV }}
         run: php .github/scripts/update-php-scoper.php
 
       - name: Create Pull Request
-        if: steps.update.outputs.updated == 'true'
+        if: env.UPDATED == 'true'
         uses: peter-evans/create-pull-request@v4
         with:
-          title: "Update PHP Scoper to ${{ steps.update.outputs.new-version }}"
+          title: "Update PHP Scoper to ${{ env.NEW_VERSION }}"
           body: |
-            - Updated required PHP version to ${{ steps.update.outputs.php-version }}
+            - Updated required PHP version to ${{ env.PHP_VERSION }}
             - Downloaded latest release to bin/ folder
-          branch: update-php-scoper-${{ steps.update.outputs.new-version }}
+          branch: update-php-scoper-${{ env.NEW_VERSION }}
 
       - name: Tag new version
-        if: steps.update.outputs.updated == 'true'
+        if: env.UPDATED == 'true'
         run: |
-          git tag ${{ steps.update.outputs.new-version }}
-          git push origin ${{ steps.update.outputs.new-version }}
+          git tag ${{ env.NEW_VERSION }}
+          git push origin ${{ env.NEW_VERSION }}

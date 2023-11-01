@@ -31,8 +31,13 @@ $newVersion = $latestRelease['tag_name'];
 $downloadUrl = $latestRelease['assets'][0]['browser_download_url'];
 
 // Check if a new release is available
-$currentVersion = trim(shell_exec('git describe --tags `git rev-list --tags --max-count=1`'));
-if ($newVersion !== $currentVersion) {
+$currentVersion = trim(shell_exec('git tag | tail -n1')); // Get the latest tag, or nothing if no tags exist
+
+if (empty($currentVersion)) {
+	$currentVersion = '0.0.0'; // Default version if no tags are present
+}
+
+if (version_compare($newVersion, $currentVersion, '>')) {
 	// Update composer.json
 	$newPhpVersion = $latestRelease['target_commitish']; // Assuming the target commitish is the PHP version
 	updateComposerJson($newPhpVersion);
@@ -40,9 +45,10 @@ if ($newVersion !== $currentVersion) {
 	// Download latest release
 	downloadLatestRelease($downloadUrl);
 
-	echo "::set-output name=updated::true";
-	echo "::set-output name=new-version::$newVersion";
-	echo "::set-output name=php-version::$newPhpVersion";
+	// Use Environment Files for setting output variables
+	file_put_contents(getenv('GITHUB_ENV'), "UPDATED=true" . PHP_EOL, FILE_APPEND);
+	file_put_contents(getenv('GITHUB_ENV'), "NEW_VERSION=$newVersion" . PHP_EOL, FILE_APPEND);
+	file_put_contents(getenv('GITHUB_ENV'), "PHP_VERSION=$newPhpVersion" . PHP_EOL, FILE_APPEND);
 } else {
-	echo "::set-output name=updated::false";
+	file_put_contents(getenv('GITHUB_ENV'), "UPDATED=false" . PHP_EOL, FILE_APPEND);
 }
