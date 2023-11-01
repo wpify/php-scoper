@@ -1,0 +1,48 @@
+name: Update PHP Scoper
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-php-scoper:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0' # Set the PHP version to your project's requirement
+
+      - name: Install dependencies
+        run: |
+          composer install --no-progress
+
+      - name: Update PHP Scoper
+        id: update
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: php .github/scripts/update-php-scoper.php
+
+      - name: Create Pull Request
+        if: steps.update.outputs.updated == 'true'
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: "Update PHP Scoper to ${{ steps.update.outputs.new-version }}"
+          body: |
+            - Updated required PHP version to ${{ steps.update.outputs.php-version }}
+            - Downloaded latest release to bin/ folder
+          branch: update-php-scoper-${{ steps.update.outputs.new-version }}
+
+      - name: Tag new version
+        if: steps.update.outputs.updated == 'true'
+        run: |
+          git tag ${{ steps.update.outputs.new-version }}
+          git push origin ${{ steps.update.outputs.new-version }}
