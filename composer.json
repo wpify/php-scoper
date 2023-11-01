@@ -1,6 +1,7 @@
 {
     "name": "wpify/php-scoper",
     "type": "library",
+    "license": "MIT",
     "authors": [
         {
             "name": "mejta",
