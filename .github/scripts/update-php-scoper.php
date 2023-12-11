@@ -54,13 +54,24 @@ if (version_compare($newVersion, $currentVersion, '>')) {
 	// Update composer.json
 	updateComposerJson($newPhpVersion);
 
+	// The current MD5
+	$current = md5_file('bin/php-scoper.phar');
+
 	// Download latest release
 	downloadLatestRelease($downloadUrl);
 
-	// Use Environment Files for setting output variables
-	file_put_contents(getenv('GITHUB_ENV'), "UPDATED=true" . PHP_EOL, FILE_APPEND);
-	file_put_contents(getenv('GITHUB_ENV'), "NEW_VERSION=$newVersion" . PHP_EOL, FILE_APPEND);
-	file_put_contents(getenv('GITHUB_ENV'), "PHP_VERSION=$newPhpVersion" . PHP_EOL, FILE_APPEND);
+	// The new MD5
+	$new = md5_file('bin/php-scoper.phar');
+
+	// Update only of MD5 is different
+	if ( $current !== $new ) {
+		// Use Environment Files for setting output variables
+		file_put_contents(getenv('GITHUB_ENV'), "UPDATED=true" . PHP_EOL, FILE_APPEND);
+		file_put_contents(getenv('GITHUB_ENV'), "NEW_VERSION=$newVersion" . PHP_EOL, FILE_APPEND);
+		file_put_contents(getenv('GITHUB_ENV'), "PHP_VERSION=$newPhpVersion" . PHP_EOL, FILE_APPEND);		
+	} else {
+		file_put_contents(getenv('GITHUB_ENV'), "UPDATED=false" . PHP_EOL, FILE_APPEND);		
+	}
 } else {
 	file_put_contents(getenv('GITHUB_ENV'), "UPDATED=false" . PHP_EOL, FILE_APPEND);
 }
