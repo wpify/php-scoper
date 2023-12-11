@@ -48,6 +48,9 @@ if (empty($currentVersion)) {
 }
 
 if (version_compare($newVersion, $currentVersion, '>')) {
+	echo "Current version: $currentVersion" . PHP_EOL;
+	echo "New version:     $newVersion" . PHP_EOL;
+	
 	// Update composer.json
 	updateComposerJson($newPhpVersion);
 
