@@ -42,7 +42,7 @@ $newVersion = $latestTag['name'];
 $newPhpVersion = getRequiredPhpVersion($newVersion);
 
 // Check if a new tag is available
-$currentVersion = trim(shell_exec('git tag | tail -n1')); // Get the latest tag, or nothing if no tags exist
+$currentVersion = trim(shell_exec('git tag --sort=-v:refname | head -n1')); // Get the latest tag by version order, or nothing if no tags exist
 
 if (empty($currentVersion)) {
 	$currentVersion = '0.0.0'; // Default version if no tags are present

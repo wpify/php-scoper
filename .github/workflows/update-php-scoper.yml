@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
 
@@ -29,8 +29,9 @@ jobs:
         run: php .github/scripts/update-php-scoper.php
 
       - name: Create Pull Request
+        id: cpr
         if: env.UPDATED == 'true'
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v8
         with:
           title: "Update PHP Scoper to ${{ env.NEW_VERSION }}"
           body: |
@@ -40,6 +41,13 @@ jobs:
 
       - name: Tag new version
         if: env.UPDATED == 'true'
+        env:
+          NEW_VERSION: ${{ env.NEW_VERSION }}
+          HEAD_SHA: ${{ steps.cpr.outputs.pull-request-head-sha }}
         run: |
-          git tag ${{ env.NEW_VERSION }}
-          git push origin ${{ env.NEW_VERSION }}
+          if git rev-parse -q --verify "refs/tags/$NEW_VERSION" > /dev/null; then
+            echo "Tag $NEW_VERSION already exists, nothing to do."
+            exit 0
+          fi
+          git tag "$NEW_VERSION" "$HEAD_SHA"
+          git push origin "$NEW_VERSION"
