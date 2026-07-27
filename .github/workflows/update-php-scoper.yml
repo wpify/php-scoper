@@ -21,12 +21,16 @@ jobs:
         with:
           php-version: '8.1' # Set the PHP version to your project's requirement
 
+      # TEST HARNESS - scratch branch only, never merge to main.
+      # Forces UPDATED=true so the Create Pull Request and Tag steps below
+      # (which are byte-identical to main) actually execute.
       - name: Update PHP Scoper
         id: update
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ENV: ${{ env.GITHUB_ENV }}
-        run: php .github/scripts/update-php-scoper.php
+        run: |
+          date -u +"harness run at %Y-%m-%dT%H:%M:%SZ" > .github/WORKFLOW-TEST-MARKER
+          echo "UPDATED=true" >> "$GITHUB_ENV"
+          echo "NEW_VERSION=ci-verify-tmp" >> "$GITHUB_ENV"
+          echo "PHP_VERSION=^8.2" >> "$GITHUB_ENV"
 
       - name: Create Pull Request
         id: cpr
